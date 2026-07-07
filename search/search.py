@@ -86,18 +86,81 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start=problem.getStartState()
+    stk=util.Stack()
+    stk.push(start)
+    vis=set()
+    vis.add(start)
+    prev={}
+    while not stk.isEmpty():
+        u=stk.pop()
+        vis.add(u)
+        if(problem.isGoalState(u)):
+            res=[]
+            while u!=problem.getStartState():
+                res.append(prev[u][1])
+                u=prev[u][0]
+            res.reverse()
+            return res
+        suc=problem.getSuccessors(u)
+        # print(u,' successors are',suc)
+        for v,a,c in suc:
+            if v not in vis:
+                stk.push(v)
+                prev[v]=(u,a)
+    return []
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start=problem.getStartState()
+    que=util.Queue()
+    que.push(start)
+    vis=set()
+    vis.add(start)
+    prev={}
+    while not que.isEmpty():
+        u=que.pop()
+        if(problem.isGoalState(u)):
+            res=[]
+            while u!=problem.getStartState():
+                res.append(prev[u][1])
+                u=prev[u][0]
+            res.reverse()
+            return res
+        suc=problem.getSuccessors(u)
+        for v,a,c in suc:
+            if v not in vis:
+                que.push(v)
+                prev[v]=(u,a)
+                vis.add(v)
+    return []
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start=problem.getStartState()
+    pq=util.PriorityQueue()
+    pq.push(start,0)
+    vis=set()
+    vis.add(start)
+    prev={}
+    dist={start:0}
+    while not pq.isEmpty():
+        u=pq.pop()
+        if(problem.isGoalState(u)):
+            res=[]
+            while u!=problem.getStartState():
+                res.append(prev[u][1])
+                u=prev[u][0]
+            res.reverse()
+            return res
+        vis.add(u)
+        suc=problem.getSuccessors(u)
+        for v,a,c in suc:
+            if (v not in vis) and ((v not in dist) or dist[v]>dist[u]+c):
+                dist[v]=dist[u]+c
+                pq.update(v,dist[v])
+                prev[v]=(u,a)
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -108,8 +171,30 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start=problem.getStartState()
+    pq=util.PriorityQueue()
+    pq.push(start,heuristic(start,problem))
+    vis=set()
+    vis.add(start)
+    prev={}
+    dist={start:0}
+    while not pq.isEmpty():
+        u=pq.pop()
+        if(problem.isGoalState(u)):
+            res=[]
+            while u!=problem.getStartState():
+                res.append(prev[u][1])
+                u=prev[u][0]
+            res.reverse()
+            return res
+        vis.add(u)
+        suc=problem.getSuccessors(u)
+        for v,a,c in suc:
+            if (v not in vis) and ((v not in dist) or dist[v]>dist[u]+c):
+                dist[v]=dist[u]+c
+                pq.update(v,dist[v]+heuristic(v,problem))
+                prev[v]=(u,a)
+    return []
 
 
 # Abbreviations
