@@ -100,10 +100,29 @@ def joinFactors(factors: List[Factor]):
                     "Input factors: \n" +
                     "\n".join(map(str, factors)))
 
+    unconditionedVarSet, conditionedVarSet = set(), set()
+    variableDomainsDict = {}
+    for factor in factors:
+        if variableDomainsDict == {}:
+            variableDomainsDict = factor.variableDomainsDict()
+        uv, cv = factor.unconditionedVariables(), factor.conditionedVariables()
+        for x in uv: unconditionedVarSet.add(x)
+        for x in cv: conditionedVarSet.add(x)
 
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    unconditionedVar, conditionedVar = [], []
+    for x in unconditionedVarSet: unconditionedVar.append(x)
+    for x in conditionedVarSet:
+        if x not in unconditionedVarSet: conditionedVar.append(x)
+
+    result = Factor(unconditionedVar,conditionedVar,variableDomainsDict)
+    for ad in result.getAllPossibleAssignmentDicts():
+        p = 1
+        for factor in factors:
+            p *= factor.getProbability(ad)
+        result.setProbability(ad,p)
+
+    return result
+
 
 ########### ########### ###########
 ########### QUESTION 3  ###########
@@ -151,10 +170,25 @@ def eliminateWithCallTracking(callTrackingList=None):
                     + "can't eliminate \nthat variable.\n" + \
                     "eliminationVariable:" + str(eliminationVariable) + "\n" +\
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
+        
+        unconditionedVar = [x for x in factor.unconditionedVariables() if x != eliminationVariable]
+        conditionedVar = factor.conditionedVariables()
+        variableDomainsDict = factor.variableDomainsDict()
+        variableDomainsDict.pop(eliminationVariable)
 
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        result = Factor(unconditionedVar, conditionedVar, variableDomainsDict)
+
+        elimVals = factor.variableDomainsDict()[eliminationVariable]
+
+        for ad in result.getAllPossibleAssignmentDicts():
+            p = 0
+            nad = ad
+            for v in elimVals:
+                nad[eliminationVariable] = v
+                p += factor.getProbability(nad)
+            result.setProbability(ad,p)
+
+        return result
 
     return eliminate
 
