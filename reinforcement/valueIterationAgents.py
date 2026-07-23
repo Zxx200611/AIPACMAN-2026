@@ -64,7 +64,20 @@ class ValueIterationAgent(ValueEstimationAgent):
           Run the value iteration algorithm. Note that in standard
           value iteration, V_k+1(...) depends on V_k(...)'s.
         """
-        "*** YOUR CODE HERE ***"
+        for _ in range(self.iterations):
+            new_values = util.Counter()
+            for state in self.mdp.getStates():
+                if self.mdp.isTerminal(state):
+                    continue
+                max_v = -1000000000
+                for action in self.mdp.getPossibleActions(state):
+                    nv = 0
+                    for sp, p in self.mdp.getTransitionStatesAndProbs(state, action):
+                        nv += p * (self.mdp.getReward(state, action, sp)
+                                   + self.discount * self.values[sp])
+                    max_v = max(max_v, nv)
+                new_values[state] = max_v
+            self.values = new_values
 
 
     def getValue(self, state):
@@ -78,7 +91,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        "*** YOUR CODE HERE ***"
+        nv = 0
+        for sp, p in self.mdp.getTransitionStatesAndProbs(state, action):
+            nv += p * (self.mdp.getReward(state, action, sp)
+                        + self.discount * self.getValue(sp))
+        return nv
  
 
     def computeActionFromValues(self, state):
@@ -90,7 +107,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
+        max_v, best_act = -1000000000, None
+        for action in self.mdp.getPossibleActions(state):
+            nv = 0
+            for sp, p in self.mdp.getTransitionStatesAndProbs(state, action):
+                nv += p * (self.mdp.getReward(state, action, sp)
+                            + self.discount * self.getValue(sp))
+            if nv >= max_v:
+                max_v, best_act = nv, action
+        return best_act
 
 
     def getPolicy(self, state):
